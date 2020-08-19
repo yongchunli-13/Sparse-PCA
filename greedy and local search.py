@@ -7,16 +7,12 @@ from scipy.sparse.linalg.eigen.arpack import eigsh as largest_eigsh
 
 def gen_data(n):
     
-    global S
-    global E
-    global V
-    global C
-    global T
+    global A
     
-    
-    temp = pd.read_table(os.getcwd()+'/Matrix_Reddit_2000_txt', header=None,encoding = 'utf-8',sep=',')    
-    C = np.array(temp)
-    C = np.matrix(C)
+    temp = pd.read_table(os.getcwd()+'/pitdata.csv',
+                        header=None,encoding = 'utf-8',sep=',')
+    temp = np.array(temp)
+    A = np.matrix(temp)
     
 
 def power_iteration(A):
@@ -62,7 +58,7 @@ def greedy(n, k):
         fval = []
         for i in indexN:
             sel.append(i)
-            temp = C[np.ix_(sel,sel)]
+            temp = A[np.ix_(sel,sel)]
             a,b = power_iteration(temp)
             fval.append(a)
             sel.remove(i)
@@ -109,7 +105,7 @@ def localsearch(n, k):
                 tempz[i] = 0
                 tempz[j] = 1
                 tempsel = np.flatnonzero(tempz)
-                temp = C[np.ix_(tempsel,tempsel)]
+                temp = A[np.ix_(tempsel,tempsel)]
                 a,b = power_iteration(temp)
 
                 if a > bestf:
@@ -133,7 +129,7 @@ def truncation(n, k):
     start = datetime.datetime.now()
     LB=[0]*n
     for i in range(n):
-        a = C[i]
+        a = A[i]
         a= abs(a)
         sindex = np.argsort(-a)  
         b = [0]*n
@@ -145,10 +141,10 @@ def truncation(n, k):
         
         b = np.matrix(b)
         
-        LB[i] = (b*C*b.T)[0,0]
-    LB1 =  max(max(LB),max(np.diag(C)))
+        LB[i] = (b*A*b.T)[0,0]
+    LB1 =  max(max(LB),max(np.diag(A)))
     
-    a, b = largest_eigsh(C,1)
+    a, b = largest_eigsh(A,1)
     b = b[:,0]
     b = abs(b)
     sindex = np.argsort(-b)  
@@ -158,19 +154,19 @@ def truncation(n, k):
     xnorm = np.linalg.norm(x,2)
     x = x/xnorm
     x =  np.matrix(x)
-    LB2 = (x*C*x.T)[0,0]
+    LB2 = (x*A*x.T)[0,0]
     
     end = datetime.datetime.now()
     time = (end-start).seconds
             
     return time, max(LB1, LB2)
 
-n=2000
+n=13
 gen_data(n)
 loc = 0
 df = pd.DataFrame(columns=('n','s', 'truncation', 'time', 'greedy', 'time', 'local search', 'time'))
 
-for k in range(10, 80,10): # set the values of k
+for k in range(4, 11): # set the values of k
     print("This is case ", loc+1)
     ttime, tfval = truncation(n, k)
     gtime, gx, gfval = greedy(n, k)
