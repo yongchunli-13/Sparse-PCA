@@ -13,6 +13,7 @@ Lastly, we use the solver Gurobi 9.5.2 to directly solve the SPCA, and the imple
 
 
 ## Approximation algorithms
+We investigate two approximation algorithms for solving SPCA: greedy and local search algorithms. The implementations of these exact formulations can be found in the "exact algorithms" directory.
 
 
 ## Continuous relaxations
