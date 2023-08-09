@@ -7,12 +7,12 @@ We propose three equivalent mixed-integer convex programs for SPCA, denoted by M
 
 
 To be specific, we design a branch-and-cut algorithm with the closed-form cuts to solve MISDP (6), where the implementation can be found in "Branchandcut.py".\
-We also customize a branch-and-cut algorithm to solve MISDP (15), where the implementation can be found in "Branchandcut_15.py".
-
-Specifically, the "Exact algorithms" folder contains the 
-we compute a lower bound and an upper bound of SPCA using the local search algorithm and subgradient method, which are used as input values in MILP. The test data is in "pitdata.csv" giving a matrix of size 13 * 13. More datasets can be found in "datasets.zip".
+We also customize a branch-and-cut algorithm to solve MISDP (15), where the implementation can be found in "Branchandcut_15.py".\
+The MILP (22) is implemented in the file "MILP.py".
 
 ## Approximation algorithms
 
 
 ## Continuous relaxations
+
+## Datasets
