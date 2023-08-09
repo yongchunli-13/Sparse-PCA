@@ -4,7 +4,7 @@ This project contains the implementations of exact algorithms, approximation alg
 
 ## Exact algorithms
 We propose three equivalent mixed-integer convex programs for SPCA, denoted by MISDP (6), MISDP (15), and MILP (22) in our paper.\
-To be specific, we design a branch-and-cut algorithm with the closed-form cuts to solve MISDP (6), where the implementation can be found in "Branchandcut.py". \
+To be specific, we design a branch-and-cut algorithm with the closed-form cuts to solve MISDP (6), where the implementation can be found in "Branchandcut.py".\
 We also customize a branch-and-cut algorithm to solve MISDP (15), where the implementation can be found in "Branchandcut_15.py".
 
 Specifically, the "Exact algorithms" folder contains the 
