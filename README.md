@@ -4,7 +4,7 @@ This project contains the implementations of exact algorithms, approximation alg
 
 ## Exact algorithms
 We propose three equivalent mixed-integer convex programs for SPCA, denoted by MISDP (6), MISDP (15), and MILP (22) in our paper. To be specific, we design a branch-and-cut algorithm to solve MISDP (6), where the implementation can be found in "", repsectively
-Specifically, the "Exact algorithms" folder contains 
+Specifically, the "Exact algorithms" folder contains the 
 we compute a lower bound and an upper bound of SPCA using the local search algorithm and subgradient method, which are used as input values in MILP. The test data is in "pitdata.csv" giving a matrix of size 13 * 13. More datasets can be found in "datasets.zip".
 
 ## Approximation algorithms
