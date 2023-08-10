@@ -30,3 +30,9 @@ The implementations of SDP relaxation (16) is available in the "sdp_rels.py" fil
 Lastly, we compare the proposed SDP relaxations with SDP relaxation (17) whose implementation is also available in the "sdp_rels.py" file.
 
 ## Datasets
+
+# Thank you
+
+Thank you for your interest in Sparse PCA (SPCA). Please let me know if you encounter any issues using this code, or have comments or questions. Feel free to email me anytime.
+
+Yongchun Li ycli@gatech.edu
