@@ -21,5 +21,6 @@ The implementation of randomized algorithm is available in the "rspca.py" file.\
 The implementation of SDP-based algorithm is available in the "spca_sdp.py" file.
 
 ## Continuous relaxations
+We propose three SDP continuous relaxations which provide different upper bounds for SPCA, denoted by SDP relaxation (8), SDP relaxation (13),  and SDP relaxation (16) in our paper. The implementations of these continuous relaxation can be found in the "continous relaxations" directory.
 
 ## Datasets
