@@ -18,7 +18,7 @@ We investigate two approximation algorithms for solving SPCA: greedy and local s
 
 To be specific, The implementations of truncation, greedy, and local search algorithms can be found in the "lower_bounds.py" file.\
 The implementation of randomized algorithm is available in the "rspca.py" file.\
-The implementation of SDP-based algorithm is available in the "spca_sdp.py" file.\
+The implementation of SDP-based algorithm is available in the "spca_sdp.py" file.
 
 ## Continuous relaxations
 
