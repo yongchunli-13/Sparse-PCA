@@ -1,6 +1,6 @@
 # Exact and Approximation Algorithms for Sparse PCA (SPCA)
 
-This project contains the implementations of exact algorithms, approximation algorithms, and continuous relaxations for SPCA in our paper "Exact and Approximation Algorithms for Sparse PCA": http://www.optimization-online.org/DB_FILE/2020/05/7802.pdf.
+This project contains the implementations of exact algorithms, approximation algorithms, and continuous relaxations for SPCA in our paper "Exact and Approximation Algorithms for Sparse PCA": http://www.optimization-online.org/DB_FILE/2020/05/7802.pdf. Below is the detailed explanation of each directory.
 
 ## Exact algorithms
 We propose three equivalent mixed-integer convex programs to solve SPCA to optimality, denoted by MISDP (6), MISDP (15), and MILP (22) in our paper. The implementations of these exact formulations can be found in the "exact algorithms" directory.
@@ -30,6 +30,7 @@ The implementations of SDP relaxation (16) is available in the "sdp_rels.py" fil
 Lastly, we compare the proposed SDP relaxations with SDP relaxation (17) whose implementation is also available in the "sdp_rels.py" file.
 
 ## Datasets
+Ten UCI datasets we test are available at https://github.com/maryami66/uci_dataset/tree/main, https://github.com/treforevans/uci_datasets
 
 # Thank you
 
