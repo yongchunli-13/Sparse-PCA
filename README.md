@@ -23,4 +23,7 @@ The implementation of SDP-based algorithm is available in the "spca_sdp.py" file
 ## Continuous relaxations
 We propose three SDP continuous relaxations which provide different upper bounds for SPCA, denoted by SDP relaxation (8), SDP relaxation (13),  and SDP relaxation (16) in our paper. The implementations of these continuous relaxation can be found in the "continous relaxations" directory.
 
+
+To be specific, The implementations of SDP relaxation (8) is available in the "sdp_rel_eight.py" file
+
 ## Datasets
