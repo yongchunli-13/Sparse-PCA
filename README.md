@@ -13,9 +13,12 @@ Lastly, we use the solver Gurobi 9.5.2 to directly solve the SPCA, and the imple
 
 
 ## Approximation algorithms
-We investigate two approximation algorithms for solving SPCA: greedy and local search algorithms, and the implementations can be found in the "approximation algorithms" directory
+We investigate two approximation algorithms for solving SPCA: greedy and local search algorithms, and compare them with the existing truncation algorithm, randomized algorithm, and SDP-based algorithm. The implementations can be found in the "approximation algorithms" directory
 
-To be specific, The implementations of these exact formulations can be found in the "lower_bounds.py" file.
+
+To be specific, The implementations of truncation, greedy, and local search algorithms can be found in the "lower_bounds.py" file.\
+The implementation of randomized algorithm is available in the "rspca.py" file.\
+The implementation of SDP-based algorithm is available in the "spca_sdp.py" file.\
 
 ## Continuous relaxations
 
