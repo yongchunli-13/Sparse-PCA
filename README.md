@@ -25,6 +25,8 @@ We propose three SDP continuous relaxations which provide different upper bounds
 
 
 To be specific, the implementations of SDP relaxation (8) is available in the "sdp_rel_eight.py" file.\
-The implementations of SDP relaxation (13) is available in the "sdp_rel_thirteen.py" file\
+The implementations of SDP relaxation (13) is available in the "sdp_rel_thirteen.py" file.\
+The implementations of SDP relaxation (16) is available in the "sdp_rels.py" file.\
+Lastly, we compare the proposed SDP relaxations with SDP relaxation (17) whose implementation is also available in the "sdp_rels.py" file.
 
 ## Datasets
