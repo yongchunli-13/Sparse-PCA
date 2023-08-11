@@ -38,7 +38,7 @@ for s in range(5, 20, 10): # set the values of s
 #------ benchmark (17) ------
     bval, btime = sdp_rel_seventeen(n, s)
     
-    df_SDPRel.loc[loc] = np.array([n, s, 0, 0, val_sixteen, time_sixteen, bval, btime])
+    df_SDPRel.loc[loc] = np.array([n, s, val_eight, time_eight, val_sixteen, time_sixteen, bval, btime])
     loc = loc+1 
     
 
