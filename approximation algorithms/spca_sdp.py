@@ -2,79 +2,26 @@
 import numpy as np #for all numerical computations
 import pandas as pd #similar to dataframe in R
 import scipy as sp #scientific computations (includes stats)
-import matplotlib.pyplot as plt #plotting 
-import scipy.io as sio
 import cvxpy as cp # convex optimization
-import random
-import sys
 import datetime
-import gc
-import math
 import os
 from sklearn.utils.extmath import randomized_svd
 from sklearn import preprocessing
 from uci_datasets import Dataset
-from sklearn.datasets import load_breast_cancer
-from uci_dataset.load_data import *
+
 
 ## Import data
 def gen_data(n):
     global A
-    
-    # temp = pd.read_table(os.getcwd()+'/Matrix_CovColon_txt',
-    #             header=None,encoding = 'utf-8',sep=',')
-    # temp = np.array(temp)
-    # A = np.matrix(temp)
-    # df = load_dermatology()
-    # temp = df.drop(['class'], axis=1)
-    # temp = temp.fillna(0.0)
-    
-    df = load_dermatology()
-    temp = df.drop(['class'], axis=1)
-    temp = temp.fillna(0.0)
-    
-    # df = load_diabetic()
-    
-    # temp = df.drop(['outcome'], axis=1)
-    
-    # abolone = dataset.load_abolone()
-    
-    # # temp = pd.read_table(os.getcwd()+'/pitdata.csv',
-    # #                     header=None,encoding = 'utf-8',sep=',')
 
-    # data = pd.read_table(os.getcwd()+'/diabetes.csv',
-    #           encoding = 'utf-8',sep=',')
-    # temp = data.drop(['Unnamed: 0', '1'], axis=1)
-    
-    # data = Dataset("housing")
-    # temp = data.x
-        
-    # digits = load_breast_cancer()
-    # temp = digits.data
-    # data = pd.read_table(os.getcwd()+'/spambase/spambase.data',  header=None,
-    #           encoding = 'utf-8',sep=',')
-    # temp = data.drop([57], axis=1)
+    data = Dataset("pol")
+    temp = data.x
     temp = preprocessing.normalize(temp)/10 ## normalize data
-    
     temp = np.array(temp)
     A = np.matrix(temp)
     A = A.T*A
     
-# def gen_data(n):
-#     global A
-    
-#     # temp = pd.read_table(os.getcwd()+'/pitdata.csv',
-#     #                     header=None,encoding = 'utf-8',sep=',')
 
-#     data = pd.read_table(os.getcwd()+'/spambase/spambase.data',
-#                     header=None,encoding = 'utf-8',sep=',')
-    
-#     temp = data.drop([57], axis=1)
-#     temp = preprocessing.normalize(temp)/10 ## normalize data
-    
-#     temp = np.array(temp)
-#     A = np.matrix(temp)
-#     A = A.T*A
 
 def spca_sdp(n, s):
     start = datetime.datetime.now()

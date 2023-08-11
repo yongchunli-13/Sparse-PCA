@@ -7,59 +7,19 @@ from sklearn import preprocessing
 from uci_datasets import Dataset
 from sklearn.utils.extmath import randomized_svd
 from scipy.linalg import sqrtm
-from sklearn.datasets import load_breast_cancer
-from uci_dataset.load_data import *
+
 
 ## Import data
 def gen_data(n):
     global A
-    
-    # temp = pd.read_table(os.getcwd()+'/Matrix_CovColon_txt',
-    #             header=None,encoding = 'utf-8',sep=',')
-    # temp = np.array(temp)
-    # A = np.matrix(temp)
-    
-    df = load_dermatology()
-    temp = df.drop(['class'], axis=1)
-    temp = temp.fillna(0.0)
-    
-    # data = pd.read_table(os.getcwd()+'/spambase/spambase.data',  header=None,
-    #           encoding = 'utf-8',sep=',')
-    # temp = data.drop([57], axis=1)
-    
-    # df = load_hcc_survival()
-    # temp = df.drop(['Class'], axis=1)
-    # temp = temp.fillna(0.0)
-    # df = load_climate_crashes()
-    # temp = df.drop(['outcome'], axis=1)
-    
-    # temp = pd.read_table(os.getcwd()+'/pitdata.csv',
-    #                     header=None,encoding = 'utf-8',sep=',')
 
-    # data = pd.read_table(os.getcwd()+'/vehicle.csv',
-    #                 encoding = 'utf-8',sep=',')
-    
-    # temp = data.drop(['Class'], axis=1)
-    
-    # digits = load_breast_cancer()
-    # temp = digits.data
-    
-    # data = pd.read_table(os.getcwd()+'/spambase/spambase.data',
-    #                 header=None, encoding = 'utf-8',sep=',')
-    # temp = data.drop([57], axis=1)
-    
-    
-    # data = pd.read_table(os.getcwd()+'/wdbc.csv',
-    #           encoding = 'utf-8',sep=',')
-    # temp = data.drop(['Unnamed: 0', '1'], axis=1)
-    
-    # data = Dataset("housing")
-    # temp = data.x
+    data = Dataset("pol")
+    temp = data.x
     temp = preprocessing.normalize(temp)/10 ## normalize data
-    
     temp = np.array(temp)
     A = np.matrix(temp)
     A = A.T*A
+ 
     
     
 def power_iteration(B):
