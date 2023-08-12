@@ -6,8 +6,6 @@ import numpy as np
 import pandas as pd
 from sklearn import preprocessing
 from uci_datasets import Dataset
-from uci_dataset.load_data import *
-from sklearn.datasets import load_digits
 
 ## Import data
 def gen_data(n):
@@ -19,40 +17,12 @@ def gen_data(n):
     global d
     global A
     
-        
-    # digits = load_digits()
-    # temp = digits.data
-    
-    # df = load_dermatology()
-    # temp = df.drop(['class'], axis=1)
-    # temp = temp.fillna(0.0)
-    
-    # data = pd.read_table(os.getcwd()+'/wdbc.csv',
-    #           encoding = 'utf-8',sep=',')
-    # temp = data.drop(['Unnamed: 0', '1'], axis=1)
-    
-    # data = pd.read_table(os.getcwd()+'/spambase/spambase.data',  header=None,
-    #           encoding = 'utf-8',sep=',')
-    # temp = data.drop([57], axis=1)
-    
-    # temp = pd.read_table(os.getcwd()+'/Matrix_Eisen_Data_1_txt',
-    #             header=None,encoding = 'utf-8',sep=',')
-
-    # temp = np.array(temp)
-    # A = np.matrix(temp)
-    
-    temp = pd.read_table(os.getcwd()+'/pitdata.csv',
-                        header=None,encoding = 'utf-8',sep=',')
-    
+    data = Dataset("pol")
+    temp = data.x
+    temp = preprocessing.normalize(temp)/10 ## normalize data
     temp = np.array(temp)
     A = np.matrix(temp)
-
-    # data = Dataset("song")
-    # temp = data.x
-    # temp = preprocessing.normalize(temp)/10 ## normalize data
-    # temp = np.array(temp)
-    # A = np.matrix(temp)
-    # A = A.T*A
+    A = A.T*A
     
     ## Cholesky factorization of A  
     s, V = np.linalg.eigh(A) # eigen decomposition
@@ -64,8 +34,8 @@ def gen_data(n):
             sqrt_eigen[i] = 0
                
     V = np.diag(sqrt_eigen)*V.T
-    d = len([i for i in range(n) if s[i]>=1e-8]) ## the rank of the matrix A
-    inx = [i for i in range(n) if s[i]>=1e-8]
+    d = len([i for i in range(n) if s[i]>=1e-10]) ## the rank of the matrix A
+    inx = [i for i in range(n) if s[i]>=1e-10]
     V = V[inx,:]    
     V = np.matrix(V) #V: d*n
 
@@ -105,6 +75,7 @@ def power_iteration(B):
 
     return b_k1_norm, b_k    
  
+    
 ##-------------- greedy algorithm --------------  
 def greedy(n, k): 
     
@@ -203,7 +174,7 @@ def subgrad(mu, k):
         if T[i] > 0:
             val = val + (1-mu[i]/T[i])*S[i]  
         else:
-            val = val + S[i]
+            val = val 
     a,b = power_iteration(val) # compute the largest eigenvalue
 
     z = [0]*nx
@@ -224,7 +195,6 @@ def subgrad(mu, k):
 
 ## compute the continuous relaxation problem (13)        
 def spca_rel_thirteen(n, k):
-    start = datetime.datetime.now()
     ltime, LB, bestz = localsearch(n, k)
     zsol = bestz
     mu = [0]*n
@@ -237,7 +207,7 @@ def spca_rel_thirteen(n, k):
         if T[i] > 0:
             val = val + (1-mu[i]/T[i])*S[i]
         else:
-            val = val + S[i]
+            val = val
             
     a,b = power_iteration(val) # compute the largest eigenvalue
 
@@ -250,7 +220,7 @@ def spca_rel_thirteen(n, k):
     
     itert = 0 # number of iterations
     
-    while(itert <= 10000): 
+    while(itert <= 30000): 
         itert = itert + 1
         
         gamma_t = 1/math.sqrt(8*itert)
@@ -265,35 +235,36 @@ def spca_rel_thirteen(n, k):
 
         bestub = min(ub, bestub)
         if itert%1000 ==0:  
-            print('the current upper bound is', ub, bestub)
+            print('the current upper bound is', bestub)
 
-    end = datetime.datetime.now()
-    time = (end-start).seconds
-    return  LB, bestub
+    return  bestz, LB, bestub
 
 
-## Input a lower bound LB and an upper bound UB
-## Solve the MILP for SPCA
+
+## Solve the MILP (22) to obtain the optimal value for SPCA
 def milp22(n, k):
     #### Set model ####
     start = datetime.datetime.now()
-    LB, UB = spca_rel_thirteen(n, k)
+    
+    ## Input a lower bound LB and an upper bound UB
+    bestz, LB, UB = spca_rel_thirteen(n, k)
     print(LB, UB)
+    
     nm = int(math.log((UB-LB)*1e+4))+1 # epsilon = 1e-4
     print(LB, UB, nm)
-    if LB >= UB or nm <= 0:
+    if nm <= 0:
         end = datetime.datetime.now()
         time = (end-start).seconds
         return LB, LB, time
+    
     else:
         m = Model("milpspca")
     
-        #### Solve MILP ####
+        #### Creat coefficients ####
         coeff = [0]*nm
         for i in range(nm):
-            coeff[i] = (UB-LB)*2**(-i)
+            coeff[i] = (UB-LB)*(2**(-i))
              
-        
         #### Creat variables ####
         lambdavar = m.addMVar(shape = 1, lb=0.0,  name="lambda")
         x = m.addMVar(shape=d, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="x")
@@ -315,6 +286,11 @@ def milp22(n, k):
         #### Set objective ####
         m.setObjective(1*lambdavar, GRB.MAXIMIZE)
         
+        
+        #### Initialize solution #### 
+        for i in range(n):
+            z[i].start = bestz[i]
+    
         #### Define constraints ####    
         m.addConstr(z.sum() == k) # size constraint
         
@@ -323,11 +299,7 @@ def milp22(n, k):
             m.addConstr(B[i] == sum(V[j,i]*u1[j,i] for j in range(d)))
               
         m.addConstr(V @ B - UB*x + sum(coeff[i] * mu1[:,i] for i in range(nm)) == R) # eigenvalues
-        
-        # m.addConstr(R <= (UB-LB)*2**(-nm))
-        # m.addConstr(R >= -(UB-LB)*2**(-nm))
-        
-     
+
         ## lambda approx ###
         m.addConstr(alpha @ np.array(coeff) + lambdavar == UB)
         # m.addConstr(sum(coeff[i]*alpha[i] for i in range(nm)) + lambdavar == UB)
