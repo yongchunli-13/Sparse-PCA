@@ -27,40 +27,37 @@ def gen_data(n):
     global d
     global A
     
-    # temp = pd.read_table(os.getcwd()+'/Matrix_Eisen_Data_1_txt',
-    #             header=None,encoding = 'utf-8',sep=',')
-
-    # temp = np.array(temp)
-    # A = np.matrix(temp)
-    
-    # temp = pd.read_table(os.getcwd()+'/pitdata.csv',
-    #                     header=None,encoding = 'utf-8',sep=',')
-    
-    # temp = np.array(temp)
-    # A = np.matrix(temp)
-    
-    # data = pd.read_table(os.getcwd()+'/spambase/spambase.data',  header=None,
-    #           encoding = 'utf-8',sep=',')
-    # temp = data.drop([57], axis=1)
-    
-
-    # data = pd.read_table(os.getcwd()+'/wdbc.csv',
-    #           encoding = 'utf-8',sep=',')
-    # temp = data.drop(['Unnamed: 0', '1'], axis=1)
-    
-    digits = load_digits()
-    temp = digits.data
-    
-    # df = load_dermatology()
-    # temp = df.drop(['class'], axis=1)
-    # temp = temp.fillna(0.0)
-    
-    # data = Dataset("gas")
-    # temp = data.x
+    data = Dataset("pol")
+    temp = data.x
     temp = preprocessing.normalize(temp)/10 ## normalize data
     temp = np.array(temp)
     A = np.matrix(temp)
     A = A.T*A
+    
+    ## Cholesky factorization of A  
+    s, V = np.linalg.eigh(A) # eigen decomposition
+    sqrt_eigen = [0]*n
+    for i in range(n):
+        if s[i] > 0:
+            sqrt_eigen[i] = np.sqrt(s[i])
+        else:
+            sqrt_eigen[i] = 0
+               
+    V = np.diag(sqrt_eigen)*V.T
+    d = len([i for i in range(n) if s[i]>=1e-10]) ## the rank of the matrix A
+    inx = [i for i in range(n) if s[i]>=1e-10]
+    V = V[inx,:]    
+    V = np.matrix(V) #V: d*n
+
+
+    S = [[V[:,i] * V[:,i].T for i in range(n)]] # set of matrix v_i*v_i^T
+    S = S[0]
+    
+    T = [0]*n
+    for i in range(n):
+        T[i] = (V[:,i].T * V[:, i])[0,0]  # set of norm v_i^T*v_i
+        
+    E=np.eye(n, dtype=int)
     
     
 
@@ -95,7 +92,7 @@ def spca(n, s):
     m.addConstr(v.sum() <= math.sqrt(s))
     m.params.NonConvex=2
     m.params.OutputFlag = 1  
-    m.Params.MIPGap= 1e-5
+    m.Params.MIPGap= 1e-4
     m.optimize()
     
     end = datetime.datetime.now()
