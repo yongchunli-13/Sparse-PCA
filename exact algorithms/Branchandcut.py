@@ -1,13 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sun May  3 21:18:53 2020
 
-@author: yongchun
-"""
-
-
-import os
 from gurobipy import *
 from gurobipy import GRB
 import math
@@ -26,8 +17,6 @@ def spca_bc(n, k):
     continuous_cut = cuts.continuous_cut
     localsearch = cuts.localsearch
     gen_data(n)
-    
-
     
     def lazycuts(m,where):
         if where == GRB.callback.MIPSOL:
@@ -62,7 +51,8 @@ def spca_bc(n, k):
     m.setObjective(wvar, GRB.MAXIMIZE)
     m.addConstr(zvar.sum() == k)
     
-    ltime, LB, zsol = localsearch(n, k)
+    ltime, LB, bestz = localsearch(n, k)
+    zsol = bestz
     nu, mu  = validcut(zsol, n)  
     m.addConstr(wvar <= nu + sum(mu[i]*zvar[i] for i in range(n)))
     m.optimize()
@@ -73,7 +63,7 @@ def spca_bc(n, k):
         
     itert = 0
     print('objetive value', nu + sum(mu[i]*zsol[i] for i in range(n)), 'upper bound', wvar.x)
-    while(itert <= 100 and k>12):
+    while(itert <= 50):
         itert  =itert + 1
         nu, mu  = continuous_cut(zsol, n)
         m.addConstr(wvar <= nu + sum(mu[i]*zvar[i] for i in range(n)))
@@ -87,8 +77,9 @@ def spca_bc(n, k):
     
     for i in range(n):
         zvar[i].vtype=GRB.BINARY 
+        zvar[i].start = bestz[i]
     
-    m.Params.MIPGap= 1e-5
+    m.Params.MIPGap= 1e-4
     m.params.LazyConstraints = 1
     m.params.OutputFlag = 1
     m.params.timelimit = 3600 
@@ -96,7 +87,6 @@ def spca_bc(n, k):
         
     end = datetime.datetime.now()
     time = (end-start).seconds
-    print(time)
     
     zsol = [0]*n
     for i in range(n):

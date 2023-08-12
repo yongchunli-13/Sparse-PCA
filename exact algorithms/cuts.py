@@ -1,12 +1,9 @@
 import datetime
-import os
 import numpy as np
-import pandas as pd
 import math
 from sklearn import preprocessing
 from uci_datasets import Dataset
-from uci_dataset.load_data import *
-from sklearn.datasets import load_digits
+
 
 ## Import data
 def gen_data(n):
@@ -18,35 +15,8 @@ def gen_data(n):
     global d
     global A
     
-    # temp = pd.read_table(os.getcwd()+'/Matrix_Eisen_Data_1_txt',
-    #             header=None,encoding = 'utf-8',sep=',')
-
-    # temp = np.array(temp)
-    # A = np.matrix(temp)
-    
-    # temp = pd.read_table(os.getcwd()+'/pitdata.csv',
-    #                     header=None,encoding = 'utf-8',sep=',')
-    
-    # temp = np.array(temp)
-    # A = np.matrix(temp)
-    
-    
-    # data = pd.read_table(os.getcwd()+'/spambase/spambase.data',  header=None,
-    #           encoding = 'utf-8',sep=',')
-    # temp = data.drop([57], axis=1)
-    
-    # digits = load_digits()
-    # temp = digits.data
-    
-    data = Dataset("song")
+    data = Dataset("pol")
     temp = data.x
-    
-    # df = load_dermatology()
-    # temp = df.drop(['class'], axis=1)
-    # temp = temp.fillna(0.0)
-    
-    # data = Dataset("gas")
-    # temp = data.x
     temp = preprocessing.normalize(temp)/10 ## normalize data
     temp = np.array(temp)
     A = np.matrix(temp)
@@ -212,7 +182,7 @@ def validcut(z, n):
 ##--------------given continuous z, obtain cut by continuous relaxation (12) --------------
 ## compute the continuous relaxation problem (12)        
 def continuous_cut(zsol, n):
-    start = datetime.datetime.now()
+
     mu = [0]*n
     for i in range(n):
         if zsol[i] < 0.5:
@@ -241,8 +211,6 @@ def continuous_cut(zsol, n):
             if T[i] > 0:
                 subg[i] = zsol[i] - ((np.matrix(b)*V[:,i])[0,0])**2/T[i] 
 
-            # subg[i] = zsol[i] - ((np.matrix(b)*V[:,i])[0,0])**2/T[i] 
-        
         musol = np.array(mu) - gamma_t*np.array(subg)
         musol[musol < 0] = 0.0
         for i in range(n):
@@ -264,8 +232,5 @@ def continuous_cut(zsol, n):
             bestub = ub
             bestmu = mu
         
-
-    end = datetime.datetime.now()
-    time = (end-start).seconds
     return  besta, bestmu
 
