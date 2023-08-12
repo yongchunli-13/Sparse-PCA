@@ -17,18 +17,15 @@ import datetime
 import pandas as pd
 from numpy import matrix
 from numpy import array
-import cuts
+import cuts_15
 
 
 def spca_bc(n, k):   
-    gen_data = cuts.gen_data
-    validcut = cuts.validcut
-    continuous_cut = cuts.continuous_cut
-    localsearch = cuts.localsearch
+    gen_data = cuts_15.gen_data
+    cut = cuts_15.benderscut19
+    localsearch = cuts_15.localsearch
     gen_data(n)
-    
 
-    
     def lazycuts(m,where):
         if where == GRB.callback.MIPSOL:
             y = m.cbGetSolution(zvar)
@@ -39,7 +36,7 @@ def spca_bc(n, k):
                 else:
                     yy[i] = 0
                     
-            nu, mu  = validcut(yy, n)
+            nu, mu  = cut(yy, n, k)
             
             expr = wvar
             rhs = nu
@@ -63,7 +60,7 @@ def spca_bc(n, k):
     m.addConstr(zvar.sum() == k)
     
     ltime, LB, zsol = localsearch(n, k)
-    nu, mu  = validcut(zsol, n)  
+    nu, mu  = cut(zsol, n, k)  
     m.addConstr(wvar <= nu + sum(mu[i]*zvar[i] for i in range(n)))
     m.optimize()
     
@@ -73,9 +70,9 @@ def spca_bc(n, k):
         
     itert = 0
     print('objetive value', nu + sum(mu[i]*zsol[i] for i in range(n)), 'upper bound', wvar.x)
-    while(itert <= 10 and k>12):
-        itert  =itert + 1
-        nu, mu  = continuous_cut(zsol, n)
+    while(itert <= 50):
+        itert  = itert + 1
+        nu, mu  = cut(zsol, n, k)
         m.addConstr(wvar <= nu + sum(mu[i]*zvar[i] for i in range(n)))
         
         print('objetive value', nu + sum(mu[i]*zsol[i] for i in range(n)), 'upper bound', wvar.x)
@@ -103,4 +100,3 @@ def spca_bc(n, k):
         zsol[i] = zvar[i].x
         
     return m.objval,  m.ObjBound, time
-
