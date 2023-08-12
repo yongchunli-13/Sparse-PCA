@@ -85,7 +85,7 @@ def spca_bc(n, k):
     for i in range(n):
         zvar[i].vtype=GRB.BINARY 
     
-    m.Params.MIPGap= 1e-5
+    m.Params.MIPGap= 1e-4
     m.params.LazyConstraints = 1
     m.params.OutputFlag = 1
     m.params.timelimit = 3600 
