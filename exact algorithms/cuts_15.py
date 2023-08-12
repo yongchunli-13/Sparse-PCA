@@ -206,9 +206,6 @@ def benderscut19(z, n, k):
                                                                       Expr.mul(Expr.dot(Expr.sub(nu2,nu1),z), 0.5*k)))) 
         M.solve()
         
-        print (M.getPrimalSolutionStatus())
-        print (M.primalObjValue())
-        
         mu1sol = M.getVariable('mu1v').level()
         mu2sol = M.getVariable('mu2v').level()
         nu1sol = M.getVariable('nu1v').level()
