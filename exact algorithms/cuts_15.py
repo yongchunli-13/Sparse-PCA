@@ -1,10 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Aug  5 22:38:49 2023
 
-@author: yongchunli
-"""
 import datetime
 import os
 import numpy as np
@@ -16,7 +10,7 @@ from mosek.fusion import *
 
 
 ## Import data
-def gen_data(n):
+def gen_data(n, data_name):
     global S
     global E, Eh
     global V
@@ -25,12 +19,10 @@ def gen_data(n):
     global d
     global A
     
-    data = Dataset("pol")
-    temp = data.x
-    temp = preprocessing.normalize(temp)/10 ## normalize data
-    temp = np.array(temp)
-    A = np.matrix(temp)
-    A = A.T*A
+    data = pd.read_table(os.path.dirname(os.getcwd())+'/datasets/'+data_name+'_txt',
+          encoding = 'utf-8',sep=',')
+    temp = data.drop(['Unnamed: 0'], axis=1)
+    A = np.matrix(np.array(temp))
     
     ## Cholesky factorization of A  
     s, V = np.linalg.eigh(A) # eigen decomposition

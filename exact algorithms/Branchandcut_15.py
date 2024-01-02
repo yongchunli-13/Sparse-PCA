@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sun May  3 21:18:53 2020
-
-@author: yongchun
-"""
-
 
 import os
 from gurobipy import *
@@ -20,11 +12,11 @@ from numpy import array
 import cuts_15
 
 
-def spca_bc(n, k):   
+def spca_bc(n, data_name, k):   
     gen_data = cuts_15.gen_data
     cut = cuts_15.benderscut19
     localsearch = cuts_15.localsearch
-    gen_data(n)
+    gen_data(n, data_name)
 
     def lazycuts(m,where):
         if where == GRB.callback.MIPSOL:
@@ -61,6 +53,7 @@ def spca_bc(n, k):
     
     ltime, LB, zsol = localsearch(n, k)
     nu, mu  = cut(zsol, n, k)  
+    objval = nu + sum(mu[i]*zsol[i] for i in range(n))
     m.addConstr(wvar <= nu + sum(mu[i]*zvar[i] for i in range(n)))
     m.optimize()
     
@@ -69,13 +62,14 @@ def spca_bc(n, k):
         zsol[i] = zvar[i].x
         
     itert = 0
-    print('objetive value', nu + sum(mu[i]*zsol[i] for i in range(n)), 'upper bound', wvar.x)
-    while(itert <= 50):
+    print('objetive value', objval, 'upper bound', wvar.x)
+    while(itert <= 100 and objval + 1e-3 <= wvar.x):
         itert  = itert + 1
         nu, mu  = cut(zsol, n, k)
         m.addConstr(wvar <= nu + sum(mu[i]*zvar[i] for i in range(n)))
         
-        print('objetive value', nu + sum(mu[i]*zsol[i] for i in range(n)), 'upper bound', wvar.x)
+        objval = nu + sum(mu[i]*zsol[i] for i in range(n))
+        print('objetive value', objval, 'upper bound', wvar.x)
         m.params.OutputFlag = 0
         m.optimize()
         zsol = [0]*n

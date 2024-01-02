@@ -11,12 +11,12 @@ from numpy import array
 import cuts
 
 
-def spca_bc(n, k):   
+def spca_bc(n, data_name, k):   
     gen_data = cuts.gen_data
     validcut = cuts.validcut
     continuous_cut = cuts.continuous_cut
     localsearch = cuts.localsearch
-    gen_data(n)
+    gen_data(n, data_name)
     
     def lazycuts(m,where):
         if where == GRB.callback.MIPSOL:
@@ -53,8 +53,10 @@ def spca_bc(n, k):
     
     ltime, LB, bestz = localsearch(n, k)
     zsol = bestz
-    nu, mu  = validcut(zsol, n)  
+    nu, mu  = validcut(zsol, n) 
+    objval = nu + sum(mu[i]*zsol[i] for i in range(n))
     m.addConstr(wvar <= nu + sum(mu[i]*zvar[i] for i in range(n)))
+    m.params.OutputFlag = 0
     m.optimize()
     
     zsol = [0]*n
@@ -62,13 +64,13 @@ def spca_bc(n, k):
         zsol[i] = zvar[i].x
         
     itert = 0
-    print('objetive value', nu + sum(mu[i]*zsol[i] for i in range(n)), 'upper bound', wvar.x)
-    while(itert <= 50):
-        itert  =itert + 1
+    print('objetive value', objval, 'upper bound', wvar.x)
+    while(itert <= 100 and (wvar.x-objval)/objval >= 1e-3):
+        itert  = itert + 1
         nu, mu  = continuous_cut(zsol, n)
         m.addConstr(wvar <= nu + sum(mu[i]*zvar[i] for i in range(n)))
-        
-        print('objetive value', nu + sum(mu[i]*zsol[i] for i in range(n)), 'upper bound', wvar.x)
+        objval = nu + sum(mu[i]*zsol[i] for i in range(n))
+        print('objetive value', objval, 'upper bound', wvar.x)
         m.params.OutputFlag = 0
         m.optimize()
         zsol = [0]*n

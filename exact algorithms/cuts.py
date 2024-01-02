@@ -1,12 +1,14 @@
 import datetime
+import os
 import numpy as np
+import pandas as pd
 import math
 from sklearn import preprocessing
 from uci_datasets import Dataset
 
 
 ## Import data
-def gen_data(n):
+def gen_data(n, data_name):
     global S
     global E
     global V
@@ -15,12 +17,11 @@ def gen_data(n):
     global d
     global A
     
-    data = Dataset("pol")
-    temp = data.x
-    temp = preprocessing.normalize(temp)/10 ## normalize data
-    temp = np.array(temp)
-    A = np.matrix(temp)
-    A = A.T*A
+    data = pd.read_table(os.path.dirname(os.getcwd())+'/datasets/'+data_name+'_txt',
+          encoding = 'utf-8',sep=',')
+    temp = data.drop(['Unnamed: 0'], axis=1)
+    A = np.matrix(np.array(temp))
+    
     
     ## Cholesky factorization of A  
     s, V = np.linalg.eigh(A) # eigen decomposition
@@ -171,7 +172,9 @@ def validcut(z, n):
     for i in sel_index:
         val = val + S[i]
         
-    a,b = power_iteration(val) # compute the largest eigenvalue
+    # compute the largest eigenvalue        
+    a, b = np.linalg.eigh(val)
+    a = max(a)
     nu = a
     mu = [0]*n
     for i in uns_index:
@@ -195,7 +198,9 @@ def continuous_cut(zsol, n):
         else:
             val = val + S[i]
 
-    a,b = power_iteration(val) # compute the largest eigenvalue
+    # compute the largest eigenvalue        
+    a, b = np.linalg.eigh(val)
+    a = max(a)
     bestub = a + sum(mu[i]*zsol[i] for i in range(n)) # initial upper bound
     bestmu = mu
     besta = a
@@ -224,7 +229,11 @@ def continuous_cut(zsol, n):
                 val = val + (1-mu[i]/T[i])*S[i]  
             else:
                 val = val + S[i]
-        a,b = power_iteration(val) # compute the largest eigenvalue
+        
+        # compute the largest eigenvalue        
+        a, b = np.linalg.eigh(val)
+        a = max(a)
+        # a, b = power_iteration(val) # compute the largest eigenvalue
         ub = a + sum(mu[i]*zsol[i] for i in range(n)) # upper bound
         
         if bestub > ub:

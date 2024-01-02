@@ -8,7 +8,7 @@ from sklearn import preprocessing
 from uci_datasets import Dataset
 
 ## Import data
-def gen_data(n):
+def gen_data(n, data_name):
     global S
     global E
     global V
@@ -16,14 +16,12 @@ def gen_data(n):
     global T
     global d
     global A
-    
-    data = Dataset("pol")
-    temp = data.x
-    temp = preprocessing.normalize(temp)/10 ## normalize data
-    temp = np.array(temp)
-    A = np.matrix(temp)
-    A = A.T*A
-    
+
+    data = pd.read_table(os.path.dirname(os.getcwd())+'/datasets/'+data_name+'_txt',
+          encoding = 'utf-8',sep=',')
+    temp = data.drop(['Unnamed: 0'], axis=1)
+    A = np.matrix(np.array(temp))
+
     ## Cholesky factorization of A  
     s, V = np.linalg.eigh(A) # eigen decomposition
     sqrt_eigen = [0]*n
@@ -175,7 +173,10 @@ def subgrad(mu, k):
             val = val + (1-mu[i]/T[i])*S[i]  
         else:
             val = val 
-    a,b = power_iteration(val) # compute the largest eigenvalue
+            
+    # compute the largest eigenvalue        
+    a, b = np.linalg.eigh(val)
+    a = max(a)
 
     z = [0]*nx
     temp = mu
@@ -208,8 +209,10 @@ def spca_rel_thirteen(n, k):
             val = val + (1-mu[i]/T[i])*S[i]
         else:
             val = val
-            
-    a,b = power_iteration(val) # compute the largest eigenvalue
+                        
+    # compute the largest eigenvalue        
+    a, b = np.linalg.eigh(val)
+    a = max(a)
 
     z = [0]*n
     temp = mu
@@ -234,15 +237,15 @@ def spca_rel_thirteen(n, k):
         mu = musol
 
         bestub = min(ub, bestub)
-        if itert%1000 ==0:  
-            print('the current upper bound is', bestub)
+        # if itert%1000 ==0:  
+        #     print('the current upper bound is', bestub)
 
     return  bestz, LB, bestub
 
 
 
 ## Solve the MILP (22) to obtain the optimal value for SPCA
-def milp22(n, k):
+def milp22(n, data_name, k):
     #### Set model ####
     start = datetime.datetime.now()
     
@@ -250,97 +253,94 @@ def milp22(n, k):
     bestz, LB, UB = spca_rel_thirteen(n, k)
     print(LB, UB)
     
-    nm = int(math.log((UB-LB)*1e+4))+1 # epsilon = 1e-4
+    epsilon = 1e+4
+    nm = max(int(math.log((UB-LB)*epsilon))+1, 1) 
     print(LB, UB, nm)
-    if nm <= 0:
-        end = datetime.datetime.now()
-        time = (end-start).seconds
-        return LB, LB, time
-    
-    else:
-        m = Model("milpspca")
-    
-        #### Creat coefficients ####
-        coeff = [0]*nm
-        for i in range(nm):
-            coeff[i] = (UB-LB)*(2**(-i))
-             
-        #### Creat variables ####
-        lambdavar = m.addMVar(shape = 1, lb=0.0,  name="lambda")
-        x = m.addMVar(shape=d, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="x")
-        R = m.addMVar(shape=d, lb=-(UB-LB)*2**(-nm), ub=(UB-LB)*2**(-nm), vtype=GRB.CONTINUOUS, name="r")
-        B = m.addMVar(shape=n, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="b")
-        
-        z = m.addMVar(n, vtype=GRB.BINARY, name="z")
-    
-        u1 = m.addMVar((d,n), lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="u1")
-        u2 = m.addMVar((d,n), lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="u2")
-        
-        w = m.addMVar((d,d), lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name = "w") 
-        y = m.addMVar(d, vtype=GRB.BINARY, name="y")
-        
-        mu1 = m.addMVar((d,nm), lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="mu1")
-        mu2 = m.addMVar((d,nm), lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="mu2")
-        alpha = m.addMVar(nm, vtype=GRB.BINARY, name="alpha")
-        
-        #### Set objective ####
-        m.setObjective(1*lambdavar, GRB.MAXIMIZE)
-        
-        
-        #### Initialize solution #### 
-        for i in range(n):
-            z[i].start = bestz[i]
-    
-        #### Define constraints ####    
-        m.addConstr(z.sum() == k) # size constraint
-        
-        ## eigenvalue ##
-        for i in range(n):
-            m.addConstr(B[i] == sum(V[j,i]*u1[j,i] for j in range(d)))
-              
-        m.addConstr(V @ B - UB*x + sum(coeff[i] * mu1[:,i] for i in range(nm)) == R) # eigenvalues
 
-        ## lambda approx ###
-        m.addConstr(alpha @ np.array(coeff) + lambdavar == UB)
-        # m.addConstr(sum(coeff[i]*alpha[i] for i in range(nm)) + lambdavar == UB)
-        
-        ## inf norm ##
-        m.addConstr(sum(w[:,i] for i in range(d)) == x)
-        
-        for i in range(d):
-            m.addConstr(w[i,i] == y[i])
-            for j in range(d):
-                m.addConstr(w[j,i] <= y[i])
-                m.addConstr(w[j,i] >= -y[i])
-        m.addConstr(y.sum() == 1)
-                
-        ## left-hand binary ##  
-        #eone = np.array([1.0]*d)    
-        for i in range(n):
-            m.addConstr(u1[:,i] + u2[:,i] == x)
-            for j in range(d):
-                m.addConstr(u1[j,i] <= z[i])
-                m.addConstr(u1[j,i] >= -z[i])
+    m = Model("milpspca")
+
+    #### Creat coefficients ####
+    coeff = [0]*nm
+    for i in range(nm):
+        coeff[i] = (UB-LB)*(2**(-i))
+         
+    #### Creat variables ####
+    lambdavar = m.addMVar(shape = 1, lb=0.0, ub=UB, name="lambda")
+    x = m.addMVar(shape=d, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="x")
+    R = m.addMVar(shape=d, lb=-(UB-LB)*2**(-nm), ub=(UB-LB)*2**(-nm), vtype=GRB.CONTINUOUS, name="r")
+    B = m.addMVar(shape=n, lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="b")
+    
+    z = m.addMVar(n, vtype=GRB.BINARY, name="z")
+
+    u1 = m.addMVar((d,n), lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="u1")
+    u2 = m.addMVar((d,n), lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="u2")
+    
+    w = m.addMVar((d,d), lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name = "w") 
+    y = m.addMVar(d, vtype=GRB.BINARY, name="y")
+    
+    mu1 = m.addMVar((d,nm), lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="mu1")
+    mu2 = m.addMVar((d,nm), lb=-GRB.INFINITY, vtype=GRB.CONTINUOUS, name="mu2")
+    alpha = m.addMVar(nm, vtype=GRB.BINARY, name="alpha")
+    
+    #### Set objective ####
+    m.setObjective(1*lambdavar, GRB.MAXIMIZE)
+    
+    
+    #### Initialize solution #### 
+    for i in range(n):
+        z[i].start = bestz[i]
+
+    #### Define constraints ####    
+    m.addConstr(z.sum() <= k) # size constraint
+    
+    ## eigenvalue ##
+    for i in range(n):
+        m.addConstr(B[i] == sum(V[j,i]*u1[j,i] for j in range(d)))
+          
+    m.addConstr(V @ B - UB*x + sum(coeff[i] * mu1[:,i] for i in range(nm)) == R) # eigenvalues
+
+    ## lambda approx ###
+    m.addConstr(alpha @ np.array(coeff) + lambdavar == UB)
+    # m.addConstr(sum(coeff[i]*alpha[i] for i in range(nm)) + lambdavar == UB)
+    
+    ## inf norm ##
+    m.addConstr(sum(w[:,i] for i in range(d)) == x)
+    
+    for i in range(d):
+        m.addConstr(w[i,i] == y[i])
+        for j in range(d):
+            m.addConstr(w[j,i] <= y[i])
+            m.addConstr(w[j,i] >= -y[i])
+    m.addConstr(y.sum() == 1)
             
-                m.addConstr(u2[j,i] <= 1 - z[i])        
-                m.addConstr(u2[j,i] >= -1 + z[i])
-    
-        ## right-hand binary ##
-        for i in range(nm):
-            m.addConstr(mu1[:,i] + mu2[:,i] == x)
-            for j in range(d):
-                m.addConstr(mu1[j,i] <= alpha[i])
-                m.addConstr(mu1[j,i] >= -alpha[i])
-                
-                m.addConstr(mu2[j,i] <= 1 - alpha[i])
-                m.addConstr(mu2[j,i] >= -1 + alpha[i])
-    
-        m.params.OutputFlag = 1    
-        m.params.timelimit = 3600 
-        m.optimize()
+    ## left-hand binary ##  
+    #eone = np.array([1.0]*d)    
+    for i in range(n):
+        m.addConstr(u1[:,i] + u2[:,i] == x)
+        for j in range(d):
+            m.addConstr(u1[j,i] <= z[i])
+            m.addConstr(u1[j,i] >= -z[i])
         
-        end = datetime.datetime.now()
-        time = (end-start).seconds
-        return m.objval,  m.ObjBound, time
-                
+            m.addConstr(u2[j,i] <= 1 - z[i])        
+            m.addConstr(u2[j,i] >= -1 + z[i])
+
+    ## right-hand binary ##
+    for i in range(nm):
+        m.addConstr(mu1[:,i] + mu2[:,i] == x)
+        for j in range(d):
+            m.addConstr(mu1[j,i] <= alpha[i])
+            m.addConstr(mu1[j,i] >= -alpha[i])
+            
+            m.addConstr(mu2[j,i] <= 1 - alpha[i])
+            m.addConstr(mu2[j,i] >= -1 + alpha[i])
+
+    m.Params.MIPGap= 1e-4
+    m.params.OutputFlag = 1    
+    m.params.timelimit = 3600 
+    m.optimize()
     
+    end = datetime.datetime.now()
+    time = (end-start).seconds
+    return m.objval, m.ObjBound, time
+            
+
