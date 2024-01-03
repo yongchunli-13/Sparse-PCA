@@ -4,24 +4,24 @@ import numpy as np
 import pandas as pd
 import math
 from sklearn import preprocessing
-from uci_datasets import Dataset
 from sklearn.utils.extmath import randomized_svd
 from scipy.linalg import sqrtm
 
+from uci_datasets import Dataset
+from uci_dataset.load_data import *
+from sklearn.datasets import load_digits
+
 
 ## Import data
-def gen_data(n):
+def gen_data(n, data_name):
     global A
+    
+    data = pd.read_table(os.path.dirname(os.getcwd())+'/datasets/'+data_name+'_txt',
+          encoding = 'utf-8',sep=',')
+    temp = data.drop(['Unnamed: 0'], axis=1)
+    A = np.matrix(np.array(temp))
 
-    data = Dataset("pol")
-    temp = data.x
-    temp = preprocessing.normalize(temp)/10 ## normalize data
-    temp = np.array(temp)
-    A = np.matrix(temp)
-    A = A.T*A
- 
-    
-    
+
 def power_iteration(B):
     # Ideally choose a random vector
     # To decrease the chance that our vector

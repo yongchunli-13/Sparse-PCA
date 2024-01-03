@@ -10,22 +10,17 @@ from sklearn import preprocessing
 from uci_datasets import Dataset
 
 
-## Import data
-def gen_data(n):
+def gen_data(n, data_name):
     global A
-
-    data = Dataset("pol")
-    temp = data.x
-    temp = preprocessing.normalize(temp)/10 ## normalize data
-    temp = np.array(temp)
-    A = np.matrix(temp)
-    A = A.T*A
-    
+    data = pd.read_table(os.path.dirname(os.getcwd())+'/datasets/'+data_name+'_txt',
+          encoding = 'utf-8',sep=',')
+    temp = data.drop(['Unnamed: 0'], axis=1)
+    A = np.matrix(np.array(temp))
 
 
-def spca_sdp(n, s):
+def spca_sdp(n, data_name, s):
     start = datetime.datetime.now()
-    gen_data(n)
+    gen_data(n, data_name)
     #----------------------------------------------------------------
     #------------SPCA SDP--------------------------------------------
     #----------------------------------------------------------------
@@ -82,12 +77,12 @@ def spca_sdp(n, s):
     
     z_norm_sdp[idx]=VTA_sdp[0].copy()  ### padding other elements with zeros
     sel = [i for i in range (n) if z_norm_sdp[i] > 1e-4]
-    print(len(sel))
+    # print(len(sel))
     
     f_sdp= (np.matrix(z_norm_sdp)*A*np.matrix(z_norm_sdp).T)[0,0]
     # np.dot(z_norm_sdp,np.matmul(A,z_norm_sdp))
     nnz_sdp=np.count_nonzero(z_norm_sdp)
-    print("sdp done")
+
     end = datetime.datetime.now()
     time = (end-start).seconds
     return time, f_sdp
