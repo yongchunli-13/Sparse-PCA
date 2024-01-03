@@ -29,8 +29,10 @@ The implementations of SDP relaxation (16) is available in the "sdp_rels.py" fil
 Lastly, we compare the proposed SDP relaxations with SDP relaxation (17) whose implementation is also available in the "sdp_rels.py" file.
 
 ## Datasets
-The UCI datasets used for the numerical study are available at https://github.com/maryami66/uci_dataset/tree/main, https://github.com/treforevans/uci_datasets, where the dimension spans from 13 to 128.\
-The other datasets used for the numerical study are contained in the "datasets" directory
+The ten UCI datasets used for the numerical study are available at https://github.com/maryami66/uci_dataset/tree/main, https://github.com/treforevans/uci_datasets, where the dimension spans from 13 to 128.\ 
+The matrices $A$ generated from UCI datasets are contained in the "datasets" directory. The other datasets used for the numerical study are also contained in the "datasets" directory.
+
+## Reproduce numerical results
 
 # Thank you
 
