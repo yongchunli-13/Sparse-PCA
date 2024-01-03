@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 import math
-
+from mosek.fusion import *
 
 ## Import data
 def gen_data(n, data_name):
