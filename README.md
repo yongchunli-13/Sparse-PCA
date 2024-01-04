@@ -33,6 +33,7 @@ The ten UCI datasets used for the numerical study are available at https://githu
 The matrices $A$ generated from UCI datasets are contained in the "datasets" directory. The other datasets used for the numerical study are also contained in the "datasets" directory.
 
 ## Reproduce numerical results
+To reproduce each table in the paper, please run the file with corresponding table number in the folder "table_generation".
 
 # Thank you
 
