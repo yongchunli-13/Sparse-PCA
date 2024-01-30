@@ -57,7 +57,7 @@ def reproduce_table(tablenumber):
             df_table2.loc[loc] = np.array([n, s, LB_6, time_6, LB_15, time_15, LB_22, time_22, LB_Gu, time_Gu])
             loc = loc+1 
     
-    df_table2.to_csv(os.path.dirname(os.getcwd())+'/table_generation/table2.csv')
+        df_table2.to_csv(os.path.dirname(os.getcwd())+'/table_generation/table2.csv')
                 
      
         
